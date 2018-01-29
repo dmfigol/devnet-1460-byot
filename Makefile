@@ -1,6 +1,6 @@
 # mkisofs is part of cdrtools in MacPorts
 
-ROUTER = R1
+ROUTER = R1 R2
 ISOS = $(ROUTER:=.iso)
 PORTS = ports.cfg
 

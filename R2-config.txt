@@ -4,7 +4,7 @@ service timestamps log datetime msec
 no platform punt-keepalive disable-kernel-core
 platform console auto
 !
-hostname R1
+hostname R2
 !
 boot-start-marker
 boot-end-marker
@@ -59,19 +59,28 @@ cdp run
 !
 redundancy
 !
-class-map match-any CLASS3
- match access-group name TRAFFIC3
-!
-policy-map QOS
- class CLASS3
-  police 8000 conform-action drop
-!
 !
 !
 !
 !
 !
 ip tftp source-interface GigabitEthernet1
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
 !
 !
 !
@@ -88,11 +97,14 @@ cWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ==
 exit
 !
 !
-interface VirtualPortGroup0
- ip address 192.168.1.1 255.255.255.0
- ip nat inside
- no mop enabled
- no mop sysid
+interface Loopback1
+ ip address 10.1.1.1 255.255.255.255
+!
+interface Loopback2
+ ip address 10.2.2.2 255.255.255.255
+!
+interface Loopback3
+ ip address 10.3.3.3 255.255.255.255
 !
 interface GigabitEthernet1
  ip address dhcp
@@ -101,42 +113,56 @@ interface GigabitEthernet1
  no shut
 !
 interface GigabitEthernet2
- ip address 172.20.20.10 255.255.255.0
- ip access-group TRAFFIC2 in
- negotiation auto
- no mop enabled
- no mop sysid
- service-policy input QOS
-!
-interface GigabitEthernet3
- ip address 172.16.100.10 255.255.255.0
+ ip address 172.20.20.20 255.255.255.0
  negotiation auto
  no shut
 !
-iox
-ip nat inside source list NAT-ACL interface GigabitEthernet1 overload
+interface GigabitEthernet3
+ no ip address
+ negotiation auto
+ no shut
+!
 !
 ip forward-protocol nd
 ip http server
 ip http authentication local
 ip http secure-server
-restconf
-ip dns server
-ip route 1.1.1.1 255.255.255.255 Null0
+ip tftp source-interface GigabitEthernet1
+ip route 0.0.0.0 0.0.0.0 172.20.20.10
+ip route 1.1.1.1 255.255.255.255 172.20.20.10
+ip route 2.2.2.2 255.255.255.255 172.20.20.10
+ip route 3.3.3.3 255.255.255.255 172.20.20.10
+ip route 192.168.100.10 255.255.255.255 172.20.20.10!
 !
 !
 ip scp server enable
 !
+ip sla 1
+ icmp-echo 1.1.1.1
+ threshold 1000
+ timeout 1000
+ frequency 1
+ip sla schedule 1 life forever start-time now
+ip sla 2
+ udp-echo 2.2.2.2 60 source-port 54345 control disable
+ threshold 1000
+ timeout 1000
+ frequency 2
+ip sla schedule 2 life forever start-time now
+ip sla 3
+ icmp-echo 3.3.3.3
+ request-data-size 1300
+ threshold 300
+ timeout 300
+ frequency 1
+ip sla schedule 3 life forever start-time now
+ip sla 150
+ icmp-echo 192.168.100.10
+ threshold 1000
+ timeout 1000
+ frequency 1
+ip sla schedule 150 life forever start-time now
 !
-ip access-list extended NAT-ACL
- permit ip 192.168.1.0 0.0.0.255 any
-ip access-list extended TAC-TEST
- permit icmp any any
-ip access-list extended TRAFFIC2
- deny   ip any host 2.2.2.2
- permit ip any any
-ip access-list extended TRAFFIC3
- permit ip any host 3.3.3.3
 !
 !
 control-plane
@@ -155,6 +181,4 @@ line con 0
 line vty 0 4
  login local
 !
-app-hosting appid guestshell
- vnic gateway1 virtualportgroup 0 guest-interface 0 guest-ipaddress 192.168.1.2 netmask 255.255.255.0 gateway 192.168.1.1
 end
