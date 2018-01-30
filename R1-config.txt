@@ -59,8 +59,20 @@ cdp run
 !
 redundancy
 !
+ip access-list extended NAT-ACL
+ permit ip 192.168.1.0 0.0.0.255 any
+ip access-list extended TAC-TEST
+ permit icmp any any
+ip access-list extended TRAFFIC2
+ deny   ip any host 2.2.2.2
+ permit ip any any
+ip access-list extended TRAFFIC3
+ permit ip any host 3.3.3.3
+!
+!
 class-map match-any CLASS3
  match access-group name TRAFFIC3
+!
 !
 policy-map QOS
  class CLASS3
@@ -107,6 +119,7 @@ interface GigabitEthernet2
  no mop enabled
  no mop sysid
  service-policy input QOS
+ no shutdown
 !
 interface GigabitEthernet3
  ip address 172.16.100.10 255.255.255.0
@@ -127,16 +140,6 @@ ip route 1.1.1.1 255.255.255.255 Null0
 !
 ip scp server enable
 !
-!
-ip access-list extended NAT-ACL
- permit ip 192.168.1.0 0.0.0.255 any
-ip access-list extended TAC-TEST
- permit icmp any any
-ip access-list extended TRAFFIC2
- deny   ip any host 2.2.2.2
- permit ip any any
-ip access-list extended TRAFFIC3
- permit ip any host 3.3.3.3
 !
 !
 control-plane
