@@ -11,6 +11,9 @@ python
 import cli
 cli.clip("show version")
 
+sudo pip install on_box_python_scripts-0.2-py2-none-any.whl
+
+pip list
 
 ==========DEMO===========
 
@@ -22,7 +25,7 @@ outputs_collector -c "show ver; show log"
 Task II
 
 packet_trace
-packet_trace -int gig2 -drop all -p 16
+packet_trace -int GigabitEthernet2 -drop all -p 16
 
 Task III
 
